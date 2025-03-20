@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from students_app.models import Students
 from rest_framework.decorators import api_view
-from .serializers import StudentSerializer,EmployeeSerializer
+from .serializers import StudentSerializer,EmployeeSerializer,TeacherSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from employees_app.models import Employee
 from django.http import Http404
+from rest_framework import mixins,generics
+from teacher_app.models import Teacher
 
 @api_view(['GET','POST'])
 def students(request):
@@ -78,3 +80,23 @@ class EmployeeDetails(APIView):
         employee = self.get_object(pk)
         employee.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class Teachers(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    def get(self,request):
+        return self.list(request)
+    def post(self,request):
+        return self.create(request)
+
+
+class TeachersDetails(generics.GenericAPIView,mixins.UpdateModelMixin,mixins.RetrieveModelMixin,mixins.DestroyModelMixin):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    def get(self,request,pk):
+        return self.retrieve(request,pk)
+    def put(self,request,pk):
+        return self.update(request,pk)
+    def delete(self,request,pk):
+        return self.destroy(request,pk)
